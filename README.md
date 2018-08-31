@@ -1,3 +1,5 @@
+# Prerequisite: 1. import boto3 2. have aws configured 3. have .pem file
+
 ## CreateUser.py & changePassword.py
 When a user is there, you cannot create it. So if you are the owner, you can run changePassword.py to change the passoword. It will ask your current password.
 
