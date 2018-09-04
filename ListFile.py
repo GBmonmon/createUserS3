@@ -13,7 +13,7 @@ def listfile(usernameIn, passwordIn):
     buckets = s3_client.list_objects(Bucket=usernameIn)
     all_obj = list()
     if 'Contents' not in buckets:
-        print('No object in here...')
+        print(' ')
     else:
         for doc in buckets['Contents']:
             obj = doc['Key']
@@ -22,19 +22,22 @@ def listfile(usernameIn, passwordIn):
 
 
 if __name__ == '__main__':
-    usernameIn, passwordIn = sys.argv[1:]
     try:
-        currpassword, curremail = readPasswordFromObject('gbmonmon-alluserbucket',usernameIn)
-        if passwordIn == currpassword:
-            lstoflobject = listfile(usernameIn,passwordIn)
-            if not lstoflobject:
-                pass
+        usernameIn, passwordIn = sys.argv[1:]
+        try:
+            currpassword, curremail = readPasswordFromObject('gbmonmon-alluserbucket',usernameIn)
+            if passwordIn == currpassword:
+                lstoflobject = listfile(usernameIn,passwordIn)
+                if not lstoflobject:
+                    pass
+                else:
+                    number=1
+                    for i in lstoflobject:
+                        print('%s. %s'%(number,i))
+                        number +=1
             else:
-                number=1
-                for i in lstoflobject:
-                    print('%s. %s'%(number,i))
-                    number +=1
-        else:
-            print('wrong password...')
+                print('wrong password...')
+        except:
+            print('no sucn account...')
     except:
-        print('no sucn account...')
+        print('Usage > python ListFile.py username password')

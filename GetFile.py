@@ -1,4 +1,5 @@
 import boto3
+import botocore
 import shutil
 import sys
 import os.path
@@ -30,6 +31,7 @@ try:
         if not machine_pathIn.endswith('/'): machine_pathIn = machine_pathIn+'/'
 
         fileFromS3 = file_key_s3In.split('/')[-1]
+        print(fileFromS3)
         if os.path.isdir(currpath+fileFromS3):
             print('It is a dir, no actions taken...')
         elif os.path.isfile(fileFromS3):
@@ -38,13 +40,19 @@ try:
 
         if fileFromS3 == usernameIn: print('You can not download the file storing password and email')
         else:
-            s3.Bucket(usernameIn).download_file(file_key_s3In, fileFromS3)
-            if os.path.isfile(machine_pathIn + fileFromS3):
-                savefilename = fileFromS3 + generator() + '.bak'
-                print('Add a suffix \".bask\" to avoid the name conflict with newly downloaded file.')
-                shutil.move(machine_pathIn+fileFromS3, machine_pathIn + savefilename)
-            shutil.move(currpath + '/' + fileFromS3, machine_pathIn + fileFromS3)
-            print('Download the file \"%s\" in \"%s\"'%(fileFromS3, machine_pathIn))
+            try:
+                s3.Bucket(usernameIn).download_file(file_key_s3In, fileFromS3)
+                if os.path.isfile(machine_pathIn + fileFromS3):
+                    savefilename = fileFromS3 + generator() + '.bak'
+                    print('Add a suffix \".bask\" to avoid the name conflict with newly downloaded file.')
+                    shutil.move(machine_pathIn+fileFromS3, machine_pathIn + savefilename)
+                shutil.move(currpath + '/' + fileFromS3, machine_pathIn + fileFromS3)
+                print('Download the file \"%s\" in \"%s\"'%(fileFromS3, machine_pathIn))
+            except botocore.exceptions.ClientError as e:
+                if e.response['Error']['Code'] == "404":
+                    print("The object does not exist.")
+                else:
+                    raise
 
     else: print('wrong password...')
 except:
